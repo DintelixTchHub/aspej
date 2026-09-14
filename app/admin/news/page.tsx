@@ -1,0 +1,4 @@
+import { Plus } from 'lucide-react'
+import { AdminLayout, AdminPanel } from '@/components/admin/admin-layout'
+import { newsArticles } from '@/lib/data/school'
+export default function AdminNewsPage() { return <AdminLayout><div className="admin-top"><div><span className="eyebrow">Content</span><h2>News</h2><p>Publish stories and school announcements.</p></div><button className="button button-primary"><Plus size={16} /> New story</button></div><AdminPanel title="Published stories" description="Local prototype content"><div className="admin-card-list">{newsArticles.map((article) => <article key={article.id}><div><span className="eyebrow">{article.date}</span><h3>{article.title}</h3><p>{article.excerpt}</p></div><button className="button button-secondary">Edit</button></article>)}</div></AdminPanel></AdminLayout> }

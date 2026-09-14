@@ -1,0 +1,4 @@
+import { Plus } from 'lucide-react'
+import { AdminLayout, AdminPanel } from '@/components/admin/admin-layout'
+import { events } from '@/lib/data/school'
+export default function AdminEventsPage() { return <AdminLayout><div className="admin-top"><div><span className="eyebrow">Calendar</span><h2>Events</h2><p>Keep the ASPEJ community informed about upcoming moments.</p></div><button className="button button-primary"><Plus size={16} /> Add event</button></div><AdminPanel title="Upcoming events" description="All scheduled school events"><div className="admin-card-list">{events.map((event) => <article key={event.id}><div><span className="eyebrow">{event.date}</span><h3>{event.title}</h3><p>{event.description}</p></div><button className="button button-secondary">Edit</button></article>)}</div></AdminPanel></AdminLayout> }

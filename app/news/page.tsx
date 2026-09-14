@@ -1,0 +1,5 @@
+import { ArrowRight, Newspaper } from 'lucide-react'
+import Link from 'next/link'
+import { InternalPage, PageFrame } from '@/components/layout/public-layout'
+import { newsArticles } from '@/lib/data/school'
+export default function NewsPage() { return <InternalPage><main className="editorial-page"><div className="container"><section className="editorial-heading"><div><span className="eyebrow">Newsroom</span><h1>Stories and updates from ASPEJ.</h1></div><div className="editorial-heading-note"><Newspaper size={22} /><span>Stay close to school life, announcements, and student progress.</span></div></section><div className="news-showcase">{newsArticles.map((article, index) => <article className={`news-story-card${index === 0 ? ' news-story-card-featured' : ''}`} key={article.id}><div className="news-story-art"><span>{String(index + 1).padStart(2, '0')}</span><Newspaper size={26} /></div><div className="news-story-body"><span className="eyebrow">{article.date}</span><h2>{article.title}</h2><p>{article.excerpt}</p><Link className="text-button" href={`/news/${article.id}`}>Read story <ArrowRight size={13} /></Link></div></article>)}</div></div></main></InternalPage> }
