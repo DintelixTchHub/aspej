@@ -37,28 +37,32 @@ export default function HomePage() {
         <section className="hero">
           <div className="container hero-grid">
             <div className="hero-copy">
-              <h1>{schoolInfo.tagline}</h1>
+              <span className="eyebrow">ASPEJ — Practical Education for Your Future</span>
+              <h1>Build the skills to learn, work, and grow.</h1>
               <p>
-                {schoolInfo.description} Official institutional information will
-                be added as it is confirmed.
+                ASPEJ offers practical technical education in tourism,
+                building construction, accounting, networking, and computer
+                systems—helping students prepare for further study and the world
+                of work.
               </p>
               <div className="hero-actions">
-                <Link className="button button-primary" href="/academics">
-                  Explore academics <ArrowRight size={14} />
+                <Link className="button button-primary admissions-signal-button" href="/admissions">
+                  <span className="admissions-signal" aria-hidden="true"><i /><i /><i /></span>
+                  Apply Now <ArrowRight size={14} />
                 </Link>
-                <Link className="button button-secondary" href="/admissions">
-                  How admissions work
+                <Link className="button button-secondary" href="/academics">
+                  Explore Programs
                 </Link>
               </div>
               <p className="hero-note">
-                <ShieldCheck size={14} /> Designed for students, parents,
-                teachers, and administration.
+                <ShieldCheck size={14} /> Practical, accessible learning for
+                students, families, and future careers.
               </p>
             </div>
             <div className="school-visual">
               <img
                 src="/images/Pixabc.com_Compressed_to_100percent_aspejSchool.jpg"
-                alt="ASPEJ campus surrounded by green grounds"
+                alt="ASPEJ campus in Rwamagana District"
               />
               <div className="visual-label">
                 <span className="visual-icon">
@@ -101,6 +105,7 @@ export default function HomePage() {
                 href="/admissions"
                 title="Admissions"
                 description="Understand the application process."
+                signal
               />
               <HomeCard
                 href="/news"

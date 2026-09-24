@@ -2,11 +2,13 @@ import type { Program, Document, Application, NewsArticle, Event, GalleryImage }
 
 export const schoolInfo = {
   name: 'ASPEJ',
-  fullName: 'Lycée du Lac Muhazi (ASPEJ)',
-  tagline: 'Empowering learners through practical technical education.',
-  description: 'A private TVET college in Muhazi Sector, Rwamagana District, Rwanda’s Eastern Province.',
-  mission: 'Create a good learning environment which meets the Education, Training and Development expectations of our students.',
-  vision: 'Empower and prepare students for the labour market and self-employment.',
+  fullName: 'Lycée du Lac Muhazi – ASPEJ',
+  tagline: 'Empowering young people through technical and vocational education.',
+  description: 'A private Technical Secondary School in Muhazi Sector, Rwamagana District, Eastern Province, Rwanda.',
+  mission:
+    'Provide technical and vocational education through practical learning, quality teaching, and a supportive environment for student development.',
+  vision:
+    'Contribute to Rwanda’s development by preparing young people with practical and professional skills for the future.',
   manager: 'MUREKATETE Alphonsine',
   phone: '+250 788 591 174',
   email: 'm_alphonsine@yahoo.fr',
@@ -16,42 +18,26 @@ export const schoolInfo = {
 export const programs: Program[] = [
   {
     id: 'prog-001',
-    name: 'Masonry and Construction',
+    name: 'Building Construction',
     description:
-      'Develop practical skills in construction techniques, materials, measurements, building work, and workplace safety.',
-    duration: 'L3–L5',
+      'Students develop technical knowledge and practical competencies related to construction and the built environment.',
+    duration: 'Level 3–5',
     requirement: 'See official admission requirements',
   },
   {
     id: 'prog-002',
-    name: 'Accounting',
+    name: 'Tourism',
     description:
-      'Prepare for finance and accounting roles through bookkeeping, financial records, and business numeracy.',
-    duration: 'L3–L5',
+      'Students acquire knowledge and practical skills relevant to the tourism sector and related professional activities.',
+    duration: 'Level 3–5',
     requirement: 'See official admission requirements',
   },
   {
     id: 'prog-003',
-    name: 'Tourism',
+    name: 'Networking & Internet Technologies',
     description:
-      'Prepare for tourism and hospitality work through customer care, tourism services, reservations, communication, and entrepreneurship.',
-    duration: 'L3–L5',
-    requirement: 'See official admission requirements',
-  },
-  {
-    id: 'prog-004',
-    name: 'Networking and Internet Technologies',
-    description:
-      'Learn to install, configure, maintain, and troubleshoot computer networks and internet-related systems.',
-    duration: 'L3–L5',
-    requirement: 'See official admission requirements',
-  },
-  {
-    id: 'prog-005',
-    name: 'Computer System',
-    description:
-      'Get computer system skills and IT solutions.',
-    duration: 'L4–L5',
+      'Students develop technical knowledge and practical skills in computer networking and internet technologies.',
+    duration: 'Level 3–5',
     requirement: 'See official admission requirements',
   },
 ]

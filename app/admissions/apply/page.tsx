@@ -1,793 +1,122 @@
-"use client";
+﻿"use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  FileUp,
-  Pencil,
-  ShieldCheck,
-} from "lucide-react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import { ArrowLeft, ArrowRight, CheckCircle2, FileUp, Pencil, X } from "lucide-react";
 import { InternalPage, PageFrame } from "@/components/layout/public-layout";
+import { programs } from "@/lib/data/school";
 
-const steps = [
-  "Applicant information",
-  "Choose level",
-  "Academic information",
-  "Choose program",
-  "Parent / guardian",
-  "Other documents",
-  "Review application",
-  "Application fee",
-  "Submit application",
-];
-const programs = [
-  "Accounting",
-  "Tourism",
-  "Computer System Technology",
-  "Networking",
-  "Masonry",
-];
-const relatedFields = [
-  "Accounting",
-  "Tourism",
-  "Computer System Technology",
-  "Networking",
-  "Masonry",
-];
+const steps = ["Student", "Academic", "Contact", "Documents", "Review"];
+const programNames = programs.map((program) => program.name);
+const years = ["2026", "2027", "2028"];
+const sources = ["ASPEJ Staff", "Friend/Family", "WhatsApp", "Facebook", "Instagram", "Google/Online Search", "School Visit", "Poster/Flyer", "Other"];
+const acceptedTypes = ["image/jpeg", "image/png", "application/pdf"];
+const maxFileSize = 5 * 1024 * 1024;
 
+type Upload = { file: File; error?: string } | null;
 type ApplicationData = {
-  fullName: string;
-  dateOfBirth: string;
-  gender: string;
-  nationality: string;
-  nationalId: string;
-  phone: string;
-  email: string;
-  address: string;
-  passportPhoto: string;
-  level: "Level 3" | "Level 4" | "Level 5" | "";
-  previousSchool: string;
-  completionYear: string;
-  previousProgram: string;
-  academicDocument: string;
-  selectedProgram: string;
-  guardianName: string;
-  relationship: string;
-  guardianPhone: string;
-  guardianEmail: string;
-  guardianAddress: string;
-  emergencyContact: string;
-  nationalIdDocument: string;
-  birthCertificate: string;
-  additionalDocument: string;
-  paymentMethod: string;
-  paymentReference: string;
-  paymentProof: string;
+  fullName: string; gender: string; dateOfBirth: string; modeOfStudy: string;
+  academicYear: string; term: string; selectedProgram: string;
+  studentNames: string; guardianName: string; guardianEmail: string; guardianPhone: string;
+  guardianAddress: string; referralSource: string;
+  sdmsOrResult: Upload; reportCard: Upload; supportive: Upload;
 };
 
 const initialData: ApplicationData = {
-  fullName: "",
-  dateOfBirth: "",
-  gender: "",
-  nationality: "",
-  nationalId: "",
-  phone: "",
-  email: "",
-  address: "",
-  passportPhoto: "",
-  level: "",
-  previousSchool: "",
-  completionYear: "",
-  previousProgram: "",
-  academicDocument: "",
-  selectedProgram: "",
-  guardianName: "",
-  relationship: "",
-  guardianPhone: "",
-  guardianEmail: "",
-  guardianAddress: "",
-  emergencyContact: "",
-  nationalIdDocument: "",
-  birthCertificate: "",
-  additionalDocument: "",
-  paymentMethod: "",
-  paymentReference: "",
-  paymentProof: "",
+  fullName: "", gender: "", dateOfBirth: "", modeOfStudy: "", academicYear: "", term: "", selectedProgram: "",
+  studentNames: "", guardianName: "", guardianEmail: "", guardianPhone: "", guardianAddress: "", referralSource: "",
+  sdmsOrResult: null, reportCard: null, supportive: null,
 };
 
-function FileField({
-  label,
-  value,
-  onChange,
-  required = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-}) {
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
-    onChange(event.target.files?.[0]?.name ?? "");
-  return (
-    <label className="field file-field">
-      <span>
-        {label} {required && <b>*</b>}
-      </span>
-      <input
-        type="file"
-        required={required && !value}
-        onChange={handleChange}
-      />
-      <small>{value || "PDF, JPG or PNG accepted"}</small>
-    </label>
-  );
-}
+type Update = (key: keyof ApplicationData, value: string | Upload) => void;
 
 export default function ApplyPage() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<ApplicationData>(initialData);
-  const [submitted, setSubmitted] = useState(false);
-  const [reference, setReference] = useState("");
-  const update = (key: keyof ApplicationData) => (value: string) =>
-    setData((current) => ({ ...current, [key]: value }));
-  const updateNow = (key: keyof ApplicationData, value: string) =>
-    update(key)(value);
-  const updateFile = (key: keyof ApplicationData) => (value: string) =>
-    update(key)(value);
-  const documentLabel =
-    data.level === "Level 3"
-      ? "S3 Result Slip"
-      : data.level === "Level 4"
-        ? "Level 3 Completion Report Card"
-        : "Level 4 Completion Report Card";
-  const levelDescription =
-    data.level === "Level 3"
-      ? "S3 completion details are required."
-      : data.level
-        ? `${data.level === "Level 4" ? "Level 3" : "Level 4"} completion details are required.`
-        : "Choose a level to reveal the correct academic requirement.";
-  const relationWarning =
-    data.level !== "Level 3" &&
-    data.previousProgram &&
-    data.selectedProgram &&
-    data.previousProgram !== data.selectedProgram;
-  const progress = ((step + 1) / steps.length) * 100;
-  const canContinue = useMemo(() => {
-    if (step === 0)
-      return Boolean(
-        data.fullName &&
-        data.dateOfBirth &&
-        data.gender &&
-        data.nationality &&
-        data.nationalId &&
-        data.phone &&
-        data.email &&
-        data.address &&
-        data.passportPhoto,
-      );
-    if (step === 1) return Boolean(data.level);
-    if (step === 2)
-      return Boolean(
-        data.previousSchool && data.completionYear && data.academicDocument,
-      );
-    if (step === 3) return Boolean(data.selectedProgram) && !relationWarning;
-    if (step === 4)
-      return Boolean(
-        data.guardianName &&
-        data.relationship &&
-        data.guardianPhone &&
-        data.guardianAddress &&
-        data.emergencyContact,
-      );
-    if (step === 5)
-      return Boolean(
-        data.nationalIdDocument &&
-        data.birthCertificate &&
-        data.additionalDocument,
-      );
-    if (step === 7) return Boolean(data.paymentMethod && data.paymentReference);
-    return true;
-  }, [data, relationWarning, step]);
-  const next = () => {
-    if (canContinue)
-      setStep((current) => Math.min(current + 1, steps.length - 1));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [submitting] = useState(false);
+  const update: Update = (key, value) => setData((current) => ({ ...current, [key]: value }));
+
+  const validateStep = (target = step) => {
+    const nextErrors: Record<string, string> = {};
+    if (target === 0) {
+      if (!data.fullName.trim()) nextErrors.fullName = "Full name is required.";
+      if (!data.gender) nextErrors.gender = "Please select your gender.";
+      if (!data.dateOfBirth || new Date(data.dateOfBirth) >= new Date()) nextErrors.dateOfBirth = "Please enter a valid date of birth.";
+      if (!data.modeOfStudy) nextErrors.modeOfStudy = "Please select a mode of study.";
+    }
+    if (target === 1) {
+      if (!data.academicYear) nextErrors.academicYear = "Please select an academic year.";
+      if (!data.term) nextErrors.term = "Please select a term.";
+      if (!data.selectedProgram) nextErrors.selectedProgram = "Please select a program.";
+    }
+    if (target === 2) {
+      if (!data.studentNames.trim()) nextErrors.studentNames = "Student names are required.";
+      if (!data.guardianName.trim()) nextErrors.guardianName = "Parent/Guardian name is required.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.guardianEmail)) nextErrors.guardianEmail = "Please enter a valid email address.";
+      if (!/^[+\d][\d\s()-]{7,}$/.test(data.guardianPhone)) nextErrors.guardianPhone = "Please enter a valid phone number.";
+    }
+    if (target === 3) {
+      if (!data.sdmsOrResult) nextErrors.sdmsOrResult = "SDMS Code or Result Slip is required.";
+      if (!data.reportCard) nextErrors.reportCard = "Previous Year Report Card is required.";
+      (['sdmsOrResult', 'reportCard', 'supportive'] as const).forEach((key) => {
+        if (data[key]?.error) nextErrors[key] = data[key]?.error || "Invalid file.";
+      });
+    }
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
-  const previous = () => setStep((current) => Math.max(current - 1, 0));
+
+  const chooseFile = (key: "sdmsOrResult" | "reportCard" | "supportive", event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    let error = "";
+    if (!acceptedTypes.includes(file.type)) error = "Use a PDF, JPG, or PNG file.";
+    if (file.size > maxFileSize) error = "Each file must be 5MB or smaller.";
+    update(key, { file, error: error || undefined });
+    setErrors((current) => ({ ...current, [key]: error }));
+    event.target.value = "";
+  };
+
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    setReference(
-      `ASPEJ-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`,
-    );
-    setSubmitted(true);
+    if (submitting || !validateStep(3)) return;
+    setSubmitError("Application submission is not available yet because this project has no connected application API.");
   };
 
-  if (submitted)
-    return (
-      <InternalPage>
-        <PageFrame
-          eyebrow="Application confirmation"
-          title="Application submitted successfully."
-          intro="Keep your application number safe. You can use it to track your application status."
-        >
-          <div className="application-confirmation">
-            <CheckCircle2 size={42} />
-            <span className="eyebrow">Application number</span>
-            <strong>{reference}</strong>
-            <div className="confirmation-summary">
-              <p>
-                <span>Applicant</span>
-                <b>{data.fullName}</b>
-              </p>
-              <p>
-                <span>Applied level</span>
-                <b>{data.level}</b>
-              </p>
-              <p>
-                <span>Selected program</span>
-                <b>{data.selectedProgram}</b>
-              </p>
-              <p>
-                <span>Submitted</span>
-                <b>{new Date().toLocaleDateString("en-GB")}</b>
-              </p>
-              <p>
-                <span>Status</span>
-                <b>Pending review</b>
-              </p>
-            </div>
-            <p className="confirmation-note">
-              ASPEJ will review your information and contact you through the
-              details provided.
-            </p>
-          </div>
-        </PageFrame>
-      </InternalPage>
-    );
-
-  return (
-    <InternalPage>
-      <PageFrame
-        eyebrow="ASPEJ admissions"
-        title="Build your application, one step at a time."
-        intro="Complete the application carefully. Required documents change automatically based on the level you choose."
-      >
-        <div className="application-wizard">
-          <aside className="application-steps">
-            <div className="wizard-caption">
-              <ShieldCheck size={16} />
-              <span>Secure application</span>
-            </div>
-            {steps.map((label, index) => (
-              <button
-                type="button"
-                className={
-                  index === step
-                    ? "is-active"
-                    : index < step
-                      ? "is-complete"
-                      : ""
-                }
-                onClick={() => index <= step && setStep(index)}
-                key={label}
-              >
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                {label}
-              </button>
-            ))}
-          </aside>
-          <form className="application-form" onSubmit={submit}>
-            <div className="progress">
-              <div className="progress-label">
-                <strong>
-                  Step {step + 1} of {steps.length}
-                </strong>
-                <span>{Math.round(progress)}% complete</span>
-              </div>
-              <div className="progress-track">
-                <span style={{ width: `${progress}%` }} />
-              </div>
-            </div>
-            {step === 0 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="01"
-                  title="Applicant information"
-                  description="Tell us who is applying to ASPEJ."
-                />
-                <div className="form-fields form-grid-two">
-                  <Field
-                    label="Full name"
-                    value={data.fullName}
-                    onChange={update("fullName")}
-                    required
-                  />
-                  <Field
-                    label="Date of birth"
-                    type="date"
-                    value={data.dateOfBirth}
-                    onChange={update("dateOfBirth")}
-                    required
-                  />
-                  <Field
-                    label="Gender"
-                    value={data.gender}
-                    onChange={update("gender")}
-                    options={["Female", "Male", "Prefer not to say"]}
-                    required
-                  />
-                  <Field
-                    label="Nationality"
-                    value={data.nationality}
-                    onChange={update("nationality")}
-                    placeholder="e.g. Rwandan"
-                    required
-                  />
-                  <Field
-                    label="National ID number"
-                    value={data.nationalId}
-                    onChange={update("nationalId")}
-                    required
-                  />
-                  <Field
-                    label="Phone number"
-                    value={data.phone}
-                    onChange={update("phone")}
-                    required
-                  />
-                  <Field
-                    label="Email address"
-                    type="email"
-                    value={data.email}
-                    onChange={update("email")}
-                    required
-                  />
-                  <Field
-                    label="Address"
-                    value={data.address}
-                    onChange={update("address")}
-                    required
-                  />
-                  <FileField
-                    label="Passport photo"
-                    value={data.passportPhoto}
-                    onChange={updateFile("passportPhoto")}
-                    required
-                  />
-                </div>
-              </section>
-            )}
-            {step === 1 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="02"
-                  title="Choose your application level"
-                  description="Your selection determines the academic document required in the next step."
-                />
-                <div className="level-options">
-                  {(["Level 3", "Level 4", "Level 5"] as const).map((level) => (
-                    <button
-                      type="button"
-                      className={
-                        data.level === level
-                          ? "level-option is-selected"
-                          : "level-option"
-                      }
-                      onClick={() => {
-                        updateNow("level", level);
-                        updateNow("academicDocument", "");
-                        updateNow("previousProgram", "");
-                      }}
-                      key={level}
-                    >
-                      <strong>{level}</strong>
-                      <span>
-                        {level === "Level 3"
-                          ? "Entry through S3 completion"
-                          : `Progression from ${level === "Level 4" ? "Level 3" : "Level 4"}`}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <div className="level-callout">
-                  <strong>Required next document</strong>
-                  <span>
-                    {data.level ? documentLabel : "Select a level first"}
-                  </span>
-                  <p>{levelDescription}</p>
-                </div>
-              </section>
-            )}
-            {step === 2 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="03"
-                  title="Academic information"
-                  description={levelDescription}
-                />
-                <div className="form-fields form-grid-two">
-                  <Field
-                    label={
-                      data.level === "Level 3"
-                        ? "Previous school"
-                        : "Previous TVET school"
-                    }
-                    value={data.previousSchool}
-                    onChange={update("previousSchool")}
-                    required
-                  />
-                  <Field
-                    label={
-                      data.level === "Level 3"
-                        ? "S3 completion year"
-                        : `${data.level === "Level 4" ? "Level 3" : "Level 4"} completion year`
-                    }
-                    value={data.completionYear}
-                    onChange={update("completionYear")}
-                    placeholder="e.g. 2025"
-                    required
-                  />
-                  {data.level !== "Level 3" && (
-                    <Field
-                      label="Previous TVET program / trade"
-                      value={data.previousProgram}
-                      onChange={update("previousProgram")}
-                      options={relatedFields}
-                      required
-                    />
-                  )}
-                  <FileField
-                    label={`Upload ${documentLabel}`}
-                    value={data.academicDocument}
-                    onChange={updateFile("academicDocument")}
-                    required
-                  />
-                  {data.level === "Level 3" && (
-                    <Field
-                      label="S3 candidate / index number"
-                      value={data.previousProgram}
-                      onChange={update("previousProgram")}
-                      required
-                    />
-                  )}
-                </div>
-              </section>
-            )}
-            {step === 3 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="04"
-                  title="Choose your program"
-                  description={`Programs available for ${data.level || "your selected level"}.`}
-                />
-                <div className="program-options">
-                  {programs.map((program) => (
-                    <button
-                      type="button"
-                      className={
-                        data.selectedProgram === program
-                          ? "program-option is-selected"
-                          : "program-option"
-                      }
-                      onClick={() => updateNow("selectedProgram", program)}
-                      key={program}
-                    >
-                      <span>{program}</span>
-                      <ArrowRight size={16} />
-                    </button>
-                  ))}
-                </div>
-                {relationWarning && (
-                  <p className="form-warning">
-                    For {data.level}, your selected program should be related to
-                    your previous TVET field ({data.previousProgram}). Choose a
-                    related program to continue.
-                  </p>
-                )}
-              </section>
-            )}
-            {step === 4 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="05"
-                  title="Parent / guardian information"
-                  description="Add someone ASPEJ can contact when needed."
-                />
-                <div className="form-fields form-grid-two">
-                  <Field
-                    label="Full name"
-                    value={data.guardianName}
-                    onChange={update("guardianName")}
-                    required
-                  />
-                  <Field
-                    label="Relationship"
-                    value={data.relationship}
-                    onChange={update("relationship")}
-                    placeholder="e.g. Parent, guardian"
-                    required
-                  />
-                  <Field
-                    label="Phone number"
-                    value={data.guardianPhone}
-                    onChange={update("guardianPhone")}
-                    required
-                  />
-                  <Field
-                    label="Email address"
-                    type="email"
-                    value={data.guardianEmail}
-                    onChange={update("guardianEmail")}
-                  />
-                  <Field
-                    label="Address"
-                    value={data.guardianAddress}
-                    onChange={update("guardianAddress")}
-                    required
-                  />
-                  <Field
-                    label="Emergency contact"
-                    value={data.emergencyContact}
-                    onChange={update("emergencyContact")}
-                    required
-                  />
-                </div>
-              </section>
-            )}
-            {step === 5 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="06"
-                  title="Other required documents"
-                  description="Upload the supporting documents required for your application."
-                />
-                <div className="form-fields">
-                  <FileField
-                    label="National ID / identification document"
-                    value={data.nationalIdDocument}
-                    onChange={updateFile("nationalIdDocument")}
-                    required
-                  />
-                  <FileField
-                    label="Birth certificate"
-                    value={data.birthCertificate}
-                    onChange={updateFile("birthCertificate")}
-                    required
-                  />
-                  <FileField
-                    label="Any additional document required by ASPEJ"
-                    value={data.additionalDocument}
-                    onChange={updateFile("additionalDocument")}
-                    required
-                  />
-                </div>
-              </section>
-            )}
-            {step === 6 && (
-              <Review data={data} edit={(target) => setStep(target)} />
-            )}
-            {step === 7 && (
-              <section className="wizard-section">
-                <StepHeading
-                  number="08"
-                  title="Application fee / payment"
-                  description="Record the payment details for your application."
-                />
-                <div className="fee-banner">
-                  <strong>Application fee</strong>
-                  <span>
-                    Official fee amount will be confirmed by ASPEJ admissions.
-                  </span>
-                </div>
-                <div className="form-fields form-grid-two">
-                  <Field
-                    label="Payment method"
-                    value={data.paymentMethod}
-                    onChange={update("paymentMethod")}
-                    options={["Mobile money", "Bank transfer", "Pay at school"]}
-                    required
-                  />
-                  <Field
-                    label="Payment reference"
-                    value={data.paymentReference}
-                    onChange={update("paymentReference")}
-                    required
-                  />
-                  <FileField
-                    label="Payment proof, if required"
-                    value={data.paymentProof}
-                    onChange={updateFile("paymentProof")}
-                  />
-                </div>
-              </section>
-            )}
-            {step === 8 && (
-              <section className="wizard-section final-submit">
-                <StepHeading
-                  number="09"
-                  title="Submit application"
-                  description="Review your application one final time before sending it to ASPEJ."
-                />
-                <CheckCircle2 size={38} />
-                <h3>
-                  Please confirm that all information provided is correct.
-                </h3>
-                <p>You can go back to edit any section before submitting.</p>
-                <button className="button button-primary" type="submit">
-                  Submit application <ArrowRight size={16} />
-                </button>
-              </section>
-            )}
-            <div className="wizard-actions">
-              {step > 0 && (
-                <button
-                  className="button button-secondary"
-                  type="button"
-                  onClick={previous}
-                >
-                  <ArrowLeft size={15} /> Back
-                </button>
-              )}
-              {step < 8 && (
-                <button
-                  className="button button-primary"
-                  type="button"
-                  onClick={next}
-                  disabled={!canContinue}
-                >
-                  Continue <ArrowRight size={15} />
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      </PageFrame>
-    </InternalPage>
-  );
+  return <InternalPage><PageFrame eyebrow="ASPEJ admissions" title="Complete your application." intro="Work through each step carefully. Your information stays here as you move between steps."><div className="application-wizard"><nav className="application-steps" aria-label="Application progress">{steps.map((label, index) => <button key={label} type="button" className={index === step ? "is-active" : index < step ? "is-complete" : ""} onClick={() => index < step && setStep(index)} aria-current={index === step ? "step" : undefined}><span>{index < step ? <CheckCircle2 size={14} /> : index + 1}</span><b>{label}</b></button>)}</nav><form className="application-form" onSubmit={submit} noValidate><div className="progress" aria-hidden="true"><div className="progress-label"><strong>Step {step + 1} of 5</strong><span>{Math.round(((step + 1) / 5) * 100)}% complete</span></div><div className="progress-track"><span style={{ width: `${((step + 1) / 5) * 100}%` }} /></div></div>{step === 0 && <StudentStep data={data} update={update} errors={errors} />}{step === 1 && <AcademicStep data={data} update={update} errors={errors} />}{step === 2 && <ContactStep data={data} update={update} errors={errors} />}{step === 3 && <DocumentsStep data={data} update={update} errors={errors} chooseFile={chooseFile} />}{step === 4 && <Review data={data} edit={setStep} />}{submitError && <p className="form-warning" role="alert">{submitError}</p>}<div className="wizard-actions">{step > 0 && <button className="button button-secondary" type="button" onClick={() => setStep((current) => current - 1)}><ArrowLeft size={15} /> Back</button>}{step < 4 ? <button className="button button-primary" type="button" onClick={() => validateStep() && setStep((current) => current + 1)}>Continue <ArrowRight size={15} /></button> : <button className="button button-primary" type="submit" disabled={submitting}>{submitting ? "Submitting your application..." : "Submit application"} <ArrowRight size={15} /></button>}</div></form></div></PageFrame></InternalPage>;
 }
 
-function StepHeading({
-  number,
-  title,
-  description,
-}: {
-  number: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="wizard-heading">
-      <span>{number}</span>
-      <div>
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
-    </div>
-  );
+function StudentStep({ data, update, errors }: { data: ApplicationData; update: Update; errors: Record<string, string> }) {
+  return <section className="wizard-section"><StepHeading number="01" title="Student information" description="Tell us about the student applying to ASPEJ." /><div className="form-fields form-grid-two"><Field label="Full name" value={data.fullName} onChange={(value) => update("fullName", value)} required error={errors.fullName} /><Field label="Gender" value={data.gender} onChange={(value) => update("gender", value)} options={["Male", "Female"]} required error={errors.gender} /><Field label="Date of birth" type="date" value={data.dateOfBirth} onChange={(value) => update("dateOfBirth", value)} required error={errors.dateOfBirth} /><Field label="Mode of study" value={data.modeOfStudy} onChange={(value) => update("modeOfStudy", value)} options={["Day", "Boarding"]} required error={errors.modeOfStudy} /></div></section>;
 }
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  placeholder,
-  options,
-  required = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  type?: string;
-  placeholder?: string;
-  options?: string[];
-  required?: boolean;
-}) {
-  return (
-    <label className="field">
-      <span>
-        {label} {required && <b>*</b>}
-      </span>
-      {options ? (
-        <select
-          value={value}
-          required={required}
-          onChange={(event) => onChange(event.target.value)}
-        >
-          <option value="" disabled>
-            Select an option
-          </option>
-          {options.map((option) => (
-            <option key={option}>{option}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          value={value}
-          placeholder={placeholder}
-          required={required}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      )}
-    </label>
-  );
+
+function AcademicStep({ data, update, errors }: { data: ApplicationData; update: Update; errors: Record<string, string> }) {
+  return <section className="wizard-section"><StepHeading number="02" title="Academic selection" description="Choose the intended academic year, term, and program." /><div className="form-fields form-grid-two"><Field label="Academic year" value={data.academicYear} onChange={(value) => update("academicYear", value)} options={years} required error={errors.academicYear} /><Field label="Term" value={data.term} onChange={(value) => update("term", value)} options={["Term 1", "Term 2", "Term 3"]} required error={errors.term} /><Field label="Program / class selection" value={data.selectedProgram} onChange={(value) => update("selectedProgram", value)} options={programNames} required error={errors.selectedProgram} /></div></section>;
 }
-function Review({
-  data,
-  edit,
-}: {
-  data: ApplicationData;
-  edit: (step: number) => void;
-}) {
-  const groups = [
-    {
-      title: "Personal information",
-      step: 0,
-      items: [
-        ["Name", data.fullName],
-        ["Date of birth", data.dateOfBirth],
-        ["Gender", data.gender],
-        ["Nationality", data.nationality],
-        ["Phone", data.phone],
-        ["Email", data.email],
-        ["Passport photo", data.passportPhoto],
-      ],
-    },
-    {
-      title: "Education and program",
-      step: 1,
-      items: [
-        ["Level", data.level],
-        ["Previous school", data.previousSchool],
-        ["Completion year", data.completionYear],
-        ["Academic document", data.academicDocument],
-        ["Program", data.selectedProgram],
-      ],
-    },
-    {
-      title: "Parent / guardian",
-      step: 4,
-      items: [
-        ["Name", data.guardianName],
-        ["Relationship", data.relationship],
-        ["Phone", data.guardianPhone],
-        ["Emergency contact", data.emergencyContact],
-      ],
-    },
-    {
-      title: "Other documents",
-      step: 5,
-      items: [
-        ["National ID", data.nationalIdDocument],
-        ["Birth certificate", data.birthCertificate],
-        ["Additional document", data.additionalDocument],
-      ],
-    },
-  ];
-  return (
-    <section className="review-section">
-      <StepHeading
-        number="07"
-        title="Review application"
-        description="Check every section. Select Edit to change information before continuing."
-      />
-      {groups.map((group) => (
-        <div className="review-group" key={group.title}>
-          <div className="review-group-head">
-            <h3>{group.title}</h3>
-            <button type="button" onClick={() => edit(group.step)}>
-              <Pencil size={13} /> Edit
-            </button>
-          </div>
-          {group.items.map(([label, value]) => (
-            <p key={label}>
-              <span>{label}</span>
-              <strong>{value || "Not provided"}</strong>
-            </p>
-          ))}
-        </div>
-      ))}
-    </section>
-  );
+
+function ContactStep({ data, update, errors }: { data: ApplicationData; update: Update; errors: Record<string, string> }) {
+  return <section className="wizard-section"><StepHeading number="03" title="Contact information" description="Provide contact details for the student and parent or guardian." /><div className="form-fields form-grid-two"><Field label="Student names" value={data.studentNames} onChange={(value) => update("studentNames", value)} required error={errors.studentNames} /><Field label="Parent/Guardian name" value={data.guardianName} onChange={(value) => update("guardianName", value)} required error={errors.guardianName} /><Field label="Parent/Guardian email" type="email" value={data.guardianEmail} onChange={(value) => update("guardianEmail", value)} required error={errors.guardianEmail} /><Field label="Parent/Guardian phone" value={data.guardianPhone} onChange={(value) => update("guardianPhone", value)} required error={errors.guardianPhone} /><Field label="Parent/Guardian address" value={data.guardianAddress} onChange={(value) => update("guardianAddress", value)} /><Field label="How did you hear about ASPEJ?" value={data.referralSource} onChange={(value) => update("referralSource", value)} options={sources} /></div></section>;
+}
+
+function DocumentsStep({ data, update, errors, chooseFile }: { data: ApplicationData; update: Update; errors: Record<string, string>; chooseFile: (key: "sdmsOrResult" | "reportCard" | "supportive", event: ChangeEvent<HTMLInputElement>) => void }) {
+  return <section className="wizard-section"><StepHeading number="04" title="Documents" description="Upload clear documents in PDF, JPG, or PNG format. Maximum 5MB per file." /><div className="upload-list"><UploadField label="SDMS Code or Result Slip" required upload={data.sdmsOrResult} error={errors.sdmsOrResult} onChange={(event) => chooseFile("sdmsOrResult", event)} onRemove={() => update("sdmsOrResult", null)} /><UploadField label="Previous Year Report Card" required upload={data.reportCard} error={errors.reportCard} onChange={(event) => chooseFile("reportCard", event)} onRemove={() => update("reportCard", null)} /><UploadField label="Supportive Documents" upload={data.supportive} error={errors.supportive} onChange={(event) => chooseFile("supportive", event)} onRemove={() => update("supportive", null)} /></div></section>;
+}
+
+function UploadField({ label, required, upload, error, onChange, onRemove }: { label: string; required?: boolean; upload: Upload; error?: string; onChange: (event: ChangeEvent<HTMLInputElement>) => void; onRemove: () => void }) {
+  return <div className="upload-field"><div><strong>{label} {required && <b>*</b>}</strong><small>PDF, JPG or PNG Â· Maximum 5MB</small></div>{upload ? <div className="selected-file"><span>{upload.file.name} Â· {(upload.file.size / 1024 / 1024).toFixed(1)} MB</span><button type="button" onClick={onRemove} aria-label={`Remove ${label}`}><X size={15} /></button></div> : <label className="upload-button"><FileUp size={16} /> Choose file<input type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={onChange} /></label>}{error && <small className="field-error" role="alert">{error}</small>}</div>;
+}
+
+function Review({ data, edit }: { data: ApplicationData; edit: (step: number) => void }) {
+  const groups = [{ title: "Student information", step: 0, items: [["Full name", data.fullName], ["Gender", data.gender], ["Date of birth", data.dateOfBirth], ["Mode of study", data.modeOfStudy]] }, { title: "Academic selection", step: 1, items: [["Academic year", data.academicYear], ["Term", data.term], ["Program", data.selectedProgram]] }, { title: "Contact information", step: 2, items: [["Student names", data.studentNames], ["Parent/Guardian", data.guardianName], ["Email", data.guardianEmail], ["Phone", data.guardianPhone], ["Address", data.guardianAddress || "Not provided"]] }, { title: "Documents", step: 3, items: [["SDMS / result slip", data.sdmsOrResult?.file.name || "Not provided"], ["Report card", data.reportCard?.file.name || "Not provided"], ["Supportive documents", data.supportive?.file.name || "Not provided"]] }];
+  return <section className="review-section"><StepHeading number="05" title="Review and submit" description="Please review your information carefully before submitting your application." />{groups.map((group) => <div className="review-group" key={group.title}><div className="review-group-head"><h3>{group.title}</h3><button type="button" onClick={() => edit(group.step)}><Pencil size={13} /> Edit</button></div>{group.items.map(([label, value]) => <p key={label}><span>{label}</span><strong>{value}</strong></p>)}</div>)}</section>;
+}
+
+function StepHeading({ number, title, description }: { number: string; title: string; description: string }) {
+  return <div className="wizard-heading"><span>{number}</span><div><h2>{title}</h2><p>{description}</p></div></div>;
+}
+
+function Field({ label, value, onChange, type = "text", placeholder, options, required, error }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string; options?: string[]; required?: boolean; error?: string }) {
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  return <label className="field" htmlFor={id}><span>{label} {required && <b>*</b>}</span>{options ? <select id={id} value={value} onChange={(event) => onChange(event.target.value)} aria-invalid={Boolean(error)}><option value="">Select an option</option>{options.map((option) => <option key={option}>{option}</option>)}</select> : <input id={id} type={type} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} aria-invalid={Boolean(error)} />}{error && <small className="field-error" role="alert">{error}</small>}</label>;
 }

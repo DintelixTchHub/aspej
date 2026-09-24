@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, Check, ChevronRight, ClipboardCheck, GraduationCap, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, ChevronRight, ClipboardCheck, Download, GraduationCap } from 'lucide-react'
 import { InternalPage } from '@/components/layout/public-layout'
 
 const steps = ['Choose a program', 'Prepare requirements', 'Apply online', 'Application review', 'Admission decision']
@@ -17,6 +17,7 @@ export default function AdmissionsPage() {
 							<div className="admissions-hero-actions">
 								<Link className="button button-primary" href="/admissions/apply">Start an application <ArrowRight size={14} /></Link>
 								<Link className="text-button" href="/admissions/requirements">Check requirements <ChevronRight size={14} /></Link>
+								<Link className="text-button" href="/fees">View fees <ChevronRight size={14} /></Link>
 							</div>
 						</div>
 						<div className="admissions-hero-visual">
@@ -25,13 +26,24 @@ export default function AdmissionsPage() {
 						</div>
 					</section>
 
+					<section className="admissions-document-card" aria-labelledby="babyeyi-document-title">
+						<div>
+							<span className="eyebrow">For parents and guardians</span>
+							<h2 id="babyeyi-document-title">Babyeyi document</h2>
+							<p>Download the Babyeyi information document before beginning the application.</p>
+						</div>
+						<a className="button button-secondary" href="/documents/Babyeyi.pdf" download>
+							<Download size={15} /> Download document
+						</a>
+					</section>
+
 					<section className="admissions-journey">
 						<div className="admissions-section-heading"><div><span className="eyebrow">Your journey</span><h2>Five clear steps to apply</h2></div><p>Official deadlines and requirements are content placeholders until confirmed by ASPEJ.</p></div>
 						<div className="admission-steps">{steps.map((step, index) => <div className="admission-step" key={step}><span>{String(index + 1).padStart(2, '0')}</span><strong>{step}</strong>{index < steps.length - 1 && <ChevronRight className="step-arrow" size={14} />}</div>)}</div>
 					</section>
 
 					<section className="admissions-start-card">
-						<div className="admissions-start-icon"><Sparkles size={20} /></div>
+						<div className="admissions-start-icon"><GraduationCap size={20} /></div>
 						<div><span className="eyebrow">Ready when you are</span><h2>Your application begins with a choice.</h2><p>The online application guides you through the information ASPEJ may request from applicants.</p></div>
 						<Link className="button button-primary" href="/admissions/apply">Apply online <ArrowRight size={14} /></Link>
 					</section>
@@ -39,6 +51,17 @@ export default function AdmissionsPage() {
 					<section className="admissions-prep-grid">
 						<div className="admissions-prep-card admissions-prep-card-featured"><div className="admissions-prep-card-heading"><span className="admissions-card-icon"><ClipboardCheck size={18} /></span><div><span className="eyebrow">Before you begin</span><h2>Prepare your details</h2></div></div><p>Having these details close by will make your application smoother and easier to complete.</p><ul className="check-list">{['Personal and contact information', 'Academic background', 'Program preference', 'Supporting document information'].map((item) => <li key={item}><Check size={14} /> {item}</li>)}</ul></div>
 						<div className="admissions-prep-card admissions-requirements-card"><span className="eyebrow">Need the full checklist?</span><h2>Review official requirements first.</h2><p>Use the checklist to understand the documents and information to prepare before starting your application.</p><Link className="button button-secondary" href="/admissions/requirements">View requirements <ArrowRight size={14} /></Link></div>
+					</section>
+
+					<section className="admissions-support-banner">
+						<div>
+							<span className="eyebrow">Need support?</span>
+							<h2>Questions about your application?</h2>
+						</div>
+						<p>Our admissions team can help with requirements, status, documents, and program guidance.</p>
+						<Link className="button button-primary" href="/contact">
+							Contact support <ArrowRight size={14} />
+						</Link>
 					</section>
 				</div>
 			</main>

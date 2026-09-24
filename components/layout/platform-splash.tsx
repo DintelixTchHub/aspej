@@ -8,6 +8,7 @@ const splashStorageKey = 'aspej-platform-introduced'
 export function PlatformSplash() {
   const [visible, setVisible] = useState(true)
   const [progress, setProgress] = useState(0)
+  const splashDurationMs = 1200
 
   useEffect(() => {
     if (window.sessionStorage.getItem(splashStorageKey)) {
@@ -23,7 +24,7 @@ export function PlatformSplash() {
       window.sessionStorage.setItem(splashStorageKey, 'true')
       setProgress(100)
       setVisible(false)
-    }, 1250)
+    }, splashDurationMs)
 
     return () => {
       window.clearInterval(progressTimer)

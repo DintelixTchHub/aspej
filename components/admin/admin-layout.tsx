@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { BarChart3, Bell, CalendarDays, FileText, GalleryHorizontalEnd, LayoutDashboard, LogOut, Menu, Newspaper, Settings, Users, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Bell, CalendarDays, FileText, GalleryHorizontalEnd, LayoutDashboard, LogOut, Menu, Newspaper, ReceiptText, Settings, UploadCloud, Users, X } from 'lucide-react'
 import { useState } from 'react'
 
 const adminLinks = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Applications', href: '/admin/applications', icon: FileText },
+  { label: 'Babyeyi document', href: '/admin/babyeyi', icon: UploadCloud },
+  { label: 'Fees structure', href: '/admin/fees', icon: ReceiptText },
   { label: 'News', href: '/admin/news', icon: Newspaper },
   { label: 'Events', href: '/admin/events', icon: CalendarDays },
   { label: 'Gallery', href: '/admin/gallery', icon: GalleryHorizontalEnd },
@@ -16,7 +19,9 @@ const adminLinks = [
 ]
 
 export function AdminSidebar({ open, close }: { open: boolean; close: () => void }) {
-  return <><aside className={`admin-sidebar ${open ? 'is-open' : ''}`}><div className="admin-brand"><Link href="/admin"><span className="brand-mark"><img src="/images/aspej-logo.jpg" alt="ASPEJ crest" /></span><span><strong>ASPEJ</strong><small>Staff workspace</small></span></Link><button className="admin-close" onClick={close} aria-label="Close menu"><X size={18} /></button></div><nav className="admin-sidebar-nav">{adminLinks.map(({ label, href, icon: Icon }) => <Link key={href} href={href} onClick={close}><Icon size={17} />{label}</Link>)}</nav><Link className="admin-exit" href="/"><LogOut size={16} /> Back to website</Link></aside>{open && <button className="admin-overlay" aria-label="Close menu" onClick={close} />}</>
+  const pathname = usePathname()
+
+  return <><aside className={`admin-sidebar ${open ? 'is-open' : ''}`}><div className="admin-brand"><Link href="/admin"><span className="brand-mark"><img src="/images/aspej-logo.jpg" alt="ASPEJ crest" /></span><span><strong>ASPEJ</strong><small>Staff workspace</small></span></Link><button className="admin-close" onClick={close} aria-label="Close menu"><X size={18} /></button></div><nav className="admin-sidebar-nav">{adminLinks.map(({ label, href, icon: Icon }) => { const active = pathname === href || (href !== '/admin' && pathname.startsWith(`${href}/`)); return <Link key={href} href={href} onClick={close} aria-current={active ? 'page' : undefined}><Icon size={17} />{label}</Link> })}</nav><Link className="admin-exit" href="/"><LogOut size={16} /> Back to website</Link></aside>{open && <button className="admin-overlay" aria-label="Close menu" onClick={close} />}</>
 }
 
 export function AdminHeader({ onMenu }: { onMenu: () => void }) {

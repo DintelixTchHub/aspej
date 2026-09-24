@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, BookOpen, Check, Clock3, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, Check, Clock3 } from 'lucide-react'
 import { InternalPage, PageFrame } from '@/components/layout/public-layout'
 import { programs } from '@/lib/data/school'
 
@@ -17,49 +17,64 @@ export default function AcademicsPage() {
 			<div className="container">
 				<section className="programs-hero">
 					<div>
-						<span className="eyebrow">Academics / 2026</span>
-						<h1>Choose the skill set that moves you forward.</h1>
-						<p>Practical technical education for ambitious learners ready to build useful skills, meaningful work, and a confident next step.</p>
+						<span className="eyebrow">OUR PROGRAMS</span>
+						<h1>Explore Our Programs</h1>
+						<p>ASPEJ offers practical programs that help students build useful skills, strengthen their confidence, and prepare for further study or work.</p>
 						<div className="programs-hero-actions">
-							<Link className="button button-primary" href="/admissions/apply">Start an application <ArrowRight size={14} /></Link>
-							<Link className="text-button" href="/admissions">See admissions <ArrowRight size={13} /></Link>
+							<Link className="button button-primary" href="/admissions/apply">Apply Now <ArrowRight size={14} /></Link>
+							<Link className="text-button" href="/admissions">View admissions <ArrowRight size={13} /></Link>
 						</div>
 					</div>
 					<div className="programs-hero-note">
-						<Sparkles size={19} />
-						<strong>Five pathways</strong>
-						<span>Built around practical learning and future opportunity.</span>
+						<strong>5 practical pathways</strong>
+						<span>Aligned with real learning needs and future opportunities.</span>
 					</div>
 				</section>
 
 				<section className="programs-catalog" aria-labelledby="program-catalog-title">
 					<div className="programs-section-heading">
 						<div>
-							<span className="eyebrow">The catalogue</span>
-							<h2 id="program-catalog-title">Learning with a destination.</h2>
+							<span className="eyebrow">PROGRAM CATALOGUE</span>
+							<h2 id="program-catalog-title">Choose a path that fits your interests.</h2>
 						</div>
-						<p>Explore the pathways currently represented in the ASPEJ prototype. Official curriculum information will be added as it is confirmed.</p>
+						<p>Each program is designed to help learners build practical knowledge and prepare for meaningful study and work.</p>
 					</div>
 					<div className="program-catalog-grid">
-						{programs.map((program, index) => <article className="program-feature-card" key={program.id}>
-							<div className="program-feature-image">
-								<img src={programImages[index]} alt={`${program.name} at ASPEJ`} />
-								<span>{String(index + 1).padStart(2, '0')}</span>
-							</div>
-							<div className="program-feature-body">
-								<div className="program-feature-meta"><span><Clock3 size={13} /> {program.duration}</span><span>Technical pathway</span></div>
-								<h3>{program.name}</h3>
-								<p>{program.description}</p>
-								<div className="program-feature-footer"><span><Check size={14} /> Entry guidance available</span><Link href="/admissions/apply" aria-label={`Apply for ${program.name}`}><ArrowRight size={17} /></Link></div>
-							</div>
-						</article>)}
+						{programs.map((program, index) => (
+							<article className="program-feature-card" key={program.id}>
+								<div className="program-feature-image">
+									<img src={programImages[index]} alt={`${program.name} at ASPEJ`} />
+									<span>{String(index + 1).padStart(2, '0')}</span>
+								</div>
+								<div className="program-feature-body">
+									<div className="program-feature-meta">
+										<span><Clock3 size={13} /> {program.duration}</span>
+										<span>Program</span>
+									</div>
+									<h3>{program.name}</h3>
+									<p>{program.description}</p>
+									<div className="program-feature-footer">
+										<span><Check size={14} /> Simple application process</span>
+										<Link href="/admissions/apply" aria-label={`Apply for ${program.name}`}>
+											<ArrowRight size={17} />
+										</Link>
+									</div>
+								</div>
+							</article>
+						))}
 					</div>
 				</section>
 
 				<section className="programs-next-step">
-					<div><BookOpen size={21} /><div><span className="eyebrow">Your next step</span><h2>Ready to find your place?</h2></div></div>
-					<p>Review the admissions process, prepare your documents, and take the first step toward your chosen pathway.</p>
-					<Link className="button button-secondary" href="/admissions">View admissions <ArrowRight size={14} /></Link>
+					<div>
+						<BookOpen size={21} />
+						<div>
+							<span className="eyebrow">READY TO APPLY?</span>
+							<h2>Ready to find your place?</h2>
+						</div>
+					</div>
+					<p>Choose your program and start your application online.</p>
+					<Link className="button button-primary" href="/admissions/apply">Apply Now <ArrowRight size={14} /></Link>
 				</section>
 			</div>
 		</main>
